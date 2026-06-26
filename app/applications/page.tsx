@@ -1,80 +1,135 @@
-type JobApplication = {
-  id: number;
-  company: string;
-  role: string;
-  status: "Saved" | "Applied" | "Interview" | "Rejected" | "Offer";
-  dateApplied: string;
-};
+import Link from "next/link";
+import { applications } from "@/lib/applications";
+import { getStatusClasses } from "@/lib/statusStyles";
 
-const applications: JobApplication[] = [
-  {
-    id: 1,
-    company: "OpenAI",
-    role: "Software Engineer, New Grad",
-    status: "Saved",
-    dateApplied: "Not applied yet",
-  },
-  {
-    id: 2,
-    company: "Stripe",
-    role: "Backend Software Engineer",
-    status: "Applied",
-    dateApplied: "2026-06-17",
-  },
-  {
-    id: 3,
-    company: "Notion",
-    role: "AI Applications Engineer",
-    status: "Interview",
-    dateApplied: "2026-06-15",
-  },
-];
+export default function HomePage() {
+  const totalApplications = applications.length;
 
-export default function ApplicationsPage() {
+  const activeApplications = applications.filter((application) =>
+    ["Applied", "Online Assessment", "Interview", "Final Round"].includes(
+      application.status
+    )
+  ).length;
+
+  const interviews = applications.filter(
+    (application) =>
+      application.status === "Interview" || application.status === "Final Round"
+  ).length;
+
+  const offers = applications.filter(
+    (application) => application.status === "Offer"
+  ).length;
+
+  const rejected = applications.filter(
+    (application) => application.status === "Rejected"
+  ).length;
+
+  const stats = [
+    {
+      label: "Total Applications",
+      value: totalApplications,
+    },
+    {
+      label: "Active",
+      value: activeApplications,
+    },
+    {
+      label: "Interviews",
+      value: interviews,
+    },
+    {
+      label: "Offers",
+      value: offers,
+    },
+    {
+      label: "Rejected",
+      value: rejected,
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
       <section className="mx-auto max-w-5xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Job Applications
-          </h1>
-          <p className="mt-2 text-gray-700">
-            Track companies, roles, application statuses, and follow-up dates.
+        <div className="mb-10">
+          <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
+            Job Command Center
           </p>
+
+          <h1 className="mt-2 text-4xl font-bold text-gray-900">
+            Your job hunt, organized.
+          </h1>
+
+          <p className="mt-4 max-w-2xl text-gray-700">
+            Track applications, monitor progress, prepare for interviews, and
+            keep your recruiting pipeline in one place.
+          </p>
+
+          <div className="mt-6">
+            <Link
+              href="/applications"
+              className="inline-flex rounded-lg bg-gray-900 px-5 py-3 text-sm font-medium text-white hover:bg-gray-800"
+            >
+              View Applications
+            </Link>
+          </div>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-          <table className="w-full text-left">
-            <thead className="bg-gray-100 text-sm uppercase text-gray-600">
-              <tr>
-                <th className="px-6 py-4">Company</th>
-                <th className="px-6 py-4">Role</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Date Applied</th>
-              </tr>
-            </thead>
+        <div className="grid gap-4 md:grid-cols-5">
+          {stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
+            >
+              <p className="text-sm text-gray-600">{stat.label}</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">
+                {stat.value}
+              </p>
+            </div>
+          ))}
+        </div>
 
-            <tbody>
-              {applications.map((application) => (
-                <tr key={application.id} className="border-t border-gray-200">
-                  <td className="px-6 py-4 font-medium text-gray-900">
+        <div className="mt-10 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Recent Applications
+              </h2>
+              <p className="mt-1 text-sm text-gray-600">
+                A quick look at the latest roles in your tracker.
+              </p>
+            </div>
+
+            <Link
+              href="/applications"
+              className="text-sm font-medium text-blue-600 hover:underline"
+            >
+              View all
+            </Link>
+          </div>
+
+          <div className="divide-y divide-gray-200">
+            {applications.slice(0, 3).map((application) => (
+              <div
+                key={application.id}
+                className="flex flex-col gap-2 py-4 md:flex-row md:items-center md:justify-between"
+              >
+                <div>
+                  <p className="font-medium text-gray-900">
                     {application.company}
-                  </td>
-                  <td className="px-6 py-4 text-gray-700">
-                    {application.role}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-                      {application.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-700">
-                    {application.dateApplied}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </p>
+                  <p className="text-sm text-gray-600">{application.role}</p>
+                </div>
+
+                <span
+                  className={`rounded-full px-3 py-1 text-sm font-medium ${getStatusClasses(
+                    application.status
+                  )}`}
+                >
+                  {application.status}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </main>
